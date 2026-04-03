@@ -451,6 +451,46 @@ body.weather-stormy .lightning { animation: lightningFlash 4s ease-in-out infini
 ═══════════════════════════════════════════════════════ */
 .weather-form { margin-bottom: 0; }
 
+/* ── Dropdown group ─────────────────────────────────── */
+.dropdown-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.select-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(15, 12, 41, 0.75);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.5rem;
+  transition: border-color var(--transition), background-color var(--transition);
+}
+.select-input option {
+  background: #1a1730;
+  color: var(--color-white);
+}
+.select-input:focus {
+  border-color: var(--color-cyan);
+  background-color: rgba(15, 12, 41, 0.9);
+}
+.select-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .input-group {
   display: flex;
   gap: 12px;
@@ -519,9 +559,10 @@ body.weather-stormy .lightning { animation: lightningFlash 4s ease-in-out infini
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
 }
 
+/* ── Stats grid (3 cols desktop, 2 on mobile) ────────── */
 .weather-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.75rem;
 }
@@ -544,6 +585,30 @@ body.weather-stormy .lightning { animation: lightningFlash 4s ease-in-out infini
   font-family: var(--font-heading);
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+/* Temperature tile — larger font */
+.stat-temp .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--color-cyan), var(--color-lavender));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Condition tile — icon + text side by side */
+.stat-condition-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.weather-icon-sm {
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+  flex-shrink: 0;
 }
 
 /* ── AI Insight ─────────────────────────────────────── */
@@ -836,9 +901,10 @@ body.weather-stormy .lightning { animation: lightningFlash 4s ease-in-out infini
     font-size: 1rem;
   }
 
+  .dropdown-group { flex-direction: column; }
   .input-group { flex-direction: column; }
   .btn { width: 100%; }
-  .weather-stats { grid-template-columns: 1fr 1fr; }
+  .weather-stats { grid-template-columns: repeat(2, 1fr); }
   .footer-inner { flex-direction: column; text-align: center; }
 }
 
