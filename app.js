@@ -9,9 +9,77 @@ const ANTHROPIC_API_KEY    = "YOUR_ANTHROPIC_API_KEY"; // Replace with real key
 const OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
 const ANTHROPIC_API_URL    = "https://api.anthropic.com/v1/messages";
 
+// ── Country & City Data ──────────────────────────────
+const COUNTRIES = [
+  { name: "Argentina",     code: "AR" },
+  { name: "Australia",     code: "AU" },
+  { name: "Brazil",        code: "BR" },
+  { name: "Canada",        code: "CA" },
+  { name: "China",         code: "CN" },
+  { name: "Egypt",         code: "EG" },
+  { name: "France",        code: "FR" },
+  { name: "Germany",       code: "DE" },
+  { name: "Ghana",         code: "GH" },
+  { name: "India",         code: "IN" },
+  { name: "Indonesia",     code: "ID" },
+  { name: "Italy",         code: "IT" },
+  { name: "Japan",         code: "JP" },
+  { name: "Kenya",         code: "KE" },
+  { name: "Mexico",        code: "MX" },
+  { name: "Netherlands",   code: "NL" },
+  { name: "Nigeria",       code: "NG" },
+  { name: "Pakistan",      code: "PK" },
+  { name: "Poland",        code: "PL" },
+  { name: "Portugal",      code: "PT" },
+  { name: "Russia",        code: "RU" },
+  { name: "Saudi Arabia",  code: "SA" },
+  { name: "South Africa",  code: "ZA" },
+  { name: "South Korea",   code: "KR" },
+  { name: "Spain",         code: "ES" },
+  { name: "Sweden",        code: "SE" },
+  { name: "Turkey",        code: "TR" },
+  { name: "UAE",           code: "AE" },
+  { name: "United Kingdom",code: "GB" },
+  { name: "United States", code: "US" },
+];
+
+const CITY_MAP = {
+  AR: ["Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata", "Mar del Plata"],
+  AU: ["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Canberra", "Darwin"],
+  BR: ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Fortaleza", "Belo Horizonte", "Manaus"],
+  CA: ["Toronto", "Vancouver", "Montreal", "Calgary", "Ottawa", "Edmonton", "Winnipeg"],
+  CN: ["Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Chengdu", "Chongqing", "Wuhan", "Hangzhou"],
+  EG: ["Cairo", "Alexandria", "Giza", "Port Said", "Suez", "Luxor"],
+  FR: ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Bordeaux"],
+  DE: ["Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Stuttgart", "Düsseldorf"],
+  GH: ["Accra", "Kumasi", "Tamale", "Sekondi-Takoradi", "Cape Coast", "Tema"],
+  IN: ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad"],
+  ID: ["Jakarta", "Surabaya", "Bandung", "Medan", "Semarang", "Makassar", "Palembang"],
+  IT: ["Rome", "Milan", "Naples", "Turin", "Palermo", "Genoa", "Bologna"],
+  JP: ["Tokyo", "Osaka", "Nagoya", "Sapporo", "Fukuoka", "Kobe", "Kyoto", "Yokohama"],
+  KE: ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Malindi"],
+  MX: ["Mexico City", "Guadalajara", "Monterrey", "Puebla", "Tijuana", "León", "Mérida"],
+  NL: ["Amsterdam", "Rotterdam", "The Hague", "Utrecht", "Eindhoven", "Groningen"],
+  NG: ["Lagos", "Abuja", "Ibadan", "Kano", "Benin City", "Port Harcourt", "Kaduna"],
+  PK: ["Karachi", "Lahore", "Islamabad", "Faisalabad", "Rawalpindi", "Peshawar", "Quetta"],
+  PL: ["Warsaw", "Kraków", "Łódź", "Wrocław", "Poznań", "Gdańsk", "Szczecin"],
+  PT: ["Lisbon", "Porto", "Braga", "Coimbra", "Setúbal", "Funchal"],
+  RU: ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg", "Kazan", "Nizhny Novgorod"],
+  SA: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam", "Khobar", "Tabuk"],
+  ZA: ["Johannesburg", "Cape Town", "Durban", "Pretoria", "Port Elizabeth", "Bloemfontein"],
+  KR: ["Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju", "Suwon"],
+  ES: ["Madrid", "Barcelona", "Valencia", "Seville", "Zaragoza", "Málaga", "Bilbao"],
+  SE: ["Stockholm", "Gothenburg", "Malmö", "Uppsala", "Linköping", "Örebro"],
+  TR: ["Istanbul", "Ankara", "Izmir", "Bursa", "Adana", "Gaziantep", "Konya"],
+  AE: ["Dubai", "Abu Dhabi", "Sharjah", "Al Ain", "Ajman", "Ras Al Khaimah"],
+  GB: ["London", "Manchester", "Birmingham", "Leeds", "Glasgow", "Liverpool", "Bristol", "Edinburgh"],
+  US: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego"],
+};
+
 // ── DOM refs — Weather ───────────────────────────────
 const weatherForm      = document.getElementById("weatherForm");
-const cityInput        = document.getElementById("cityInput");
+const countrySelect    = document.getElementById("countrySelect");
+const citySelect       = document.getElementById("citySelect");
 const detectBtn        = document.getElementById("detectBtn");
 const weatherError     = document.getElementById("weatherError");
 const weatherResult    = document.getElementById("weatherResult");
@@ -24,6 +92,9 @@ const weatherHumidity  = document.getElementById("weatherHumidity");
 const weatherWind      = document.getElementById("weatherWind");
 const weatherCondition = document.getElementById("weatherCondition");
 const weatherVisibility= document.getElementById("weatherVisibility");
+const weatherPressure  = document.getElementById("weatherPressure");
+const weatherSunrise   = document.getElementById("weatherSunrise");
+const weatherSunset    = document.getElementById("weatherSunset");
 const weatherInsight   = document.getElementById("weatherInsight");
 const weatherAiLoading = document.getElementById("weatherAiLoading");
 const weatherAiText    = document.getElementById("weatherAiText");
@@ -65,13 +136,48 @@ navLinks.querySelectorAll("a").forEach(link => {
 });
 
 // ════════════════════════════════════════════════════════
+// DROPDOWN POPULATION
+// ════════════════════════════════════════════════════════
+
+// Populate country dropdown
+COUNTRIES.forEach(({ name, code }) => {
+  const opt = document.createElement("option");
+  opt.value = code;
+  opt.textContent = name;
+  countrySelect.appendChild(opt);
+});
+
+// Populate city dropdown when country changes
+countrySelect.addEventListener("change", () => {
+  const code = countrySelect.value;
+  citySelect.innerHTML = '<option value="">Select City</option>';
+  if (code && CITY_MAP[code]) {
+    CITY_MAP[code].forEach(city => {
+      const opt = document.createElement("option");
+      opt.value = city;
+      opt.textContent = city;
+      citySelect.appendChild(opt);
+    });
+    citySelect.disabled = false;
+  } else {
+    citySelect.disabled = true;
+  }
+  clearWeatherError();
+  hideElement(weatherResult);
+});
+
+// ════════════════════════════════════════════════════════
 // WEATHER — form submit
 // ════════════════════════════════════════════════════════
 weatherForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const city = cityInput.value.trim();
+  const city = citySelect.value.trim();
+  if (!countrySelect.value) {
+    showWeatherError("Please select a country.");
+    return;
+  }
   if (!city) {
-    showWeatherError("Please enter a city name.");
+    showWeatherError("Please select a city.");
     return;
   }
   await fetchWeather(city);
@@ -105,9 +211,9 @@ async function fetchWeather(city) {
 }
 
 function renderWeather(data) {
-  weatherCity.textContent    = data.name;
-  weatherCountry.textContent = data.sys?.country ? `${data.sys.country}` : "";
-  weatherTemp.textContent    = `${Math.round(data.main.temp)}°C`;
+  weatherCity.textContent      = data.name;
+  weatherCountry.textContent   = data.sys?.country ? data.sys.country : "";
+  weatherTemp.textContent      = `${Math.round(data.main.temp)}°C`;
   weatherFeelsLike.textContent = `${Math.round(data.main.feels_like)}°C`;
   weatherHumidity.textContent  = `${data.main.humidity}%`;
   weatherWind.textContent      = `${(data.wind.speed * 3.6).toFixed(1)} km/h`;
@@ -115,6 +221,11 @@ function renderWeather(data) {
   weatherVisibility.textContent = data.visibility
     ? `${(data.visibility / 1000).toFixed(1)} km`
     : "N/A";
+  weatherPressure.textContent  = `${data.main.pressure} hPa`;
+
+  const tz = data.timezone || 0;
+  weatherSunrise.textContent = data.sys?.sunrise ? formatTime(data.sys.sunrise, tz) : "N/A";
+  weatherSunset.textContent  = data.sys?.sunset  ? formatTime(data.sys.sunset,  tz) : "N/A";
 
   const iconCode = data.weather[0].icon;
   weatherIcon.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
@@ -129,13 +240,17 @@ async function fetchWeatherInsight(data) {
   showElement(weatherAiLoading);
   weatherAiText.textContent = "";
 
-  const prompt = `You are a friendly AI weather analyst. Given this weather data: 
+  const tz = data.timezone || 0;
+  const prompt = `You are a friendly AI weather analyst. Given this weather data:
 City: ${data.name}, ${data.sys?.country || ""}
 Temperature: ${Math.round(data.main.temp)}°C (feels like ${Math.round(data.main.feels_like)}°C)
 Humidity: ${data.main.humidity}%
 Wind speed: ${(data.wind.speed * 3.6).toFixed(1)} km/h
 Condition: ${data.weather[0].description}
 Visibility: ${data.visibility ? (data.visibility / 1000).toFixed(1) + " km" : "unknown"}
+Pressure: ${data.main.pressure} hPa
+Sunrise: ${data.sys?.sunrise ? formatTime(data.sys.sunrise, tz) : "N/A"}
+Sunset: ${data.sys?.sunset ? formatTime(data.sys.sunset, tz) : "N/A"}
 
 Give a 3-sentence natural language summary with practical advice for the day.`;
 
@@ -156,6 +271,13 @@ function setWeatherLoading(on) {
 }
 function showWeatherError(msg) { weatherError.textContent = msg; }
 function clearWeatherError()   { weatherError.textContent = ""; }
+
+function formatTime(unixTs, tzOffsetSeconds) {
+  const date = new Date((unixTs + tzOffsetSeconds) * 1000);
+  const h = date.getUTCHours().toString().padStart(2, "0");
+  const m = date.getUTCMinutes().toString().padStart(2, "0");
+  return `${h}:${m}`;
+}
 
 // ════════════════════════════════════════════════════════
 // WEATHER ANIMATIONS
@@ -394,3 +516,4 @@ function formatClassName(name) {
   // MobileNet class names are comma-separated; take first term and clean up
   return capitalise(name.split(",")[0].replace(/_/g, " ").trim());
 }
+

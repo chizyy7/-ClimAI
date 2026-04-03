@@ -89,16 +89,13 @@
 
       <div class="glass-card weather-card">
         <form class="weather-form" id="weatherForm" novalidate>
-          <div class="input-group">
-            <input
-              type="text"
-              id="cityInput"
-              class="text-input"
-              placeholder="Enter a city name..."
-              autocomplete="off"
-              aria-label="City name"
-              required
-            />
+          <div class="dropdown-group">
+            <select id="countrySelect" class="select-input" aria-label="Select country">
+              <option value="">Select Country</option>
+            </select>
+            <select id="citySelect" class="select-input" aria-label="Select city" disabled>
+              <option value="">Select City</option>
+            </select>
             <button type="submit" class="btn btn-primary" id="detectBtn">
               <span class="btn-text">Detect Weather</span>
               <span class="btn-spinner" aria-hidden="true"></span>
@@ -114,10 +111,9 @@
               <h3 id="weatherCity"></h3>
               <p id="weatherCountry" class="weather-country"></p>
             </div>
-            <img id="weatherIcon" src="" alt="" class="weather-icon-img" />
           </div>
           <div class="weather-stats">
-            <div class="stat-item">
+            <div class="stat-item stat-temp">
               <span class="stat-label">Temperature</span>
               <span class="stat-value" id="weatherTemp"></span>
             </div>
@@ -134,12 +130,27 @@
               <span class="stat-value" id="weatherWind"></span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Condition</span>
-              <span class="stat-value" id="weatherCondition"></span>
-            </div>
-            <div class="stat-item">
               <span class="stat-label">Visibility</span>
               <span class="stat-value" id="weatherVisibility"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Pressure</span>
+              <span class="stat-value" id="weatherPressure"></span>
+            </div>
+            <div class="stat-item stat-condition">
+              <span class="stat-label">Condition</span>
+              <div class="stat-condition-content">
+                <img id="weatherIcon" src="" alt="" class="weather-icon-sm" />
+                <span class="stat-value" id="weatherCondition"></span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Sunrise</span>
+              <span class="stat-value" id="weatherSunrise"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Sunset</span>
+              <span class="stat-value" id="weatherSunset"></span>
             </div>
           </div>
 
