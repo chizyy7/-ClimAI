@@ -475,6 +475,290 @@ function clearSkyError() {
 }
 
 // ════════════════════════════════════════════════════════
+// WORLD WEATHER SHOWCASE — live rotating city carousel
+// ════════════════════════════════════════════════════════
+
+const SHOWCASE_CITIES = [
+  { name: "Lagos",    country: "NG", flag: "🇳🇬" },
+  { name: "London",   country: "GB", flag: "🇬🇧" },
+  { name: "New York", country: "US", flag: "🇺🇸" },
+  { name: "Tokyo",    country: "JP", flag: "🇯🇵" },
+  { name: "Dubai",    country: "AE", flag: "🇦🇪" },
+];
+
+let showcaseCurrentIndex = 0;
+let showcaseTimer        = null;
+let showcaseTouchStartX  = 0;
+
+// ── SVG Weather Illustrations ─────────────────────────
+
+function svgSun() {
+  return `<svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g style="transform-box:fill-box;transform-origin:50% 50%;animation:sunRaysGlow 3s ease-in-out infinite">
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(45,65,65)"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(90,65,65)"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(135,65,65)"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(180,65,65)"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(225,65,65)"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(270,65,65)"/>
+      <polygon points="65,10 69.5,32 60.5,32" fill="#fde68a" transform="rotate(315,65,65)"/>
+    </g>
+    <circle cx="65" cy="65" r="25" fill="#fbbf24" style="filter:drop-shadow(0 0 10px rgba(251,191,36,0.85))"/>
+    <circle cx="65" cy="65" r="20" fill="#fde68a"/>
+  </svg>`;
+}
+
+function svgCloud() {
+  return `<svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="65" cy="76" rx="44" ry="22" fill="#94a3b8"/>
+    <ellipse cx="48" cy="66" rx="26" ry="22" fill="#b0bec5"/>
+    <ellipse cx="70" cy="58" rx="30" ry="26" fill="#cfd8dc"/>
+    <ellipse cx="91" cy="68" rx="22" ry="18" fill="#b0bec5"/>
+  </svg>`;
+}
+
+function svgRain() {
+  return `<svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="65" cy="50" rx="40" ry="18" fill="#64748b"/>
+    <ellipse cx="48" cy="42" rx="22" ry="18" fill="#94a3b8"/>
+    <ellipse cx="70" cy="36" rx="26" ry="22" fill="#b0bec5"/>
+    <ellipse cx="87" cy="46" rx="19" ry="15" fill="#94a3b8"/>
+    <line x1="40" y1="74" x2="35" y2="96"  stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" style="animation:rainDrop 1.1s ease-in infinite 0s"/>
+    <line x1="54" y1="70" x2="49" y2="92"  stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" style="animation:rainDrop 1.1s ease-in infinite 0.18s"/>
+    <line x1="68" y1="72" x2="63" y2="94"  stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" style="animation:rainDrop 1.1s ease-in infinite 0.36s"/>
+    <line x1="82" y1="70" x2="77" y2="92"  stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" style="animation:rainDrop 1.1s ease-in infinite 0.54s"/>
+    <line x1="47" y1="88" x2="42" y2="110" stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" style="animation:rainDrop 1.1s ease-in infinite 0.27s"/>
+    <line x1="73" y1="86" x2="68" y2="108" stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round" style="animation:rainDrop 1.1s ease-in infinite 0.63s"/>
+  </svg>`;
+}
+
+function svgStorm() {
+  return `<svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="65" cy="46" rx="42" ry="19" fill="#334155"/>
+    <ellipse cx="47" cy="38" rx="22" ry="19" fill="#475569"/>
+    <ellipse cx="70" cy="32" rx="27" ry="23" fill="#475569"/>
+    <ellipse cx="88" cy="43" rx="20" ry="16" fill="#334155"/>
+    <polygon points="74,63 61,88 72,88 57,115 85,82 72,82 86,63" fill="#fde047" style="filter:drop-shadow(0 0 6px rgba(253,224,71,0.7))"/>
+  </svg>`;
+}
+
+function svgSnow() {
+  return `<svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="65" cy="44" rx="40" ry="17" fill="#bfdbfe"/>
+    <ellipse cx="48" cy="37" rx="21" ry="17" fill="#dbeafe"/>
+    <ellipse cx="70" cy="31" rx="24" ry="20" fill="#eff6ff"/>
+    <ellipse cx="85" cy="40" rx="18" ry="14" fill="#dbeafe"/>
+    <g style="transform-box:fill-box;transform-origin:50% 50%;animation:snowFlakeFall 2.2s ease-in infinite 0s" transform="translate(36,75)">
+      <line x1="0" y1="-11" x2="0"  y2="11"  stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-11" y1="0" x2="11" y2="0"   stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-8"  y1="-8" x2="8" y2="8"   stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="8"   y1="-8" x2="-8" y2="8"  stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+    <g style="transform-box:fill-box;transform-origin:50% 50%;animation:snowFlakeFall 2.2s ease-in infinite 0.45s" transform="translate(65,80)">
+      <line x1="0" y1="-11" x2="0"  y2="11"  stroke="#bfdbfe" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-11" y1="0" x2="11" y2="0"   stroke="#bfdbfe" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-8"  y1="-8" x2="8" y2="8"   stroke="#bfdbfe" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="8"   y1="-8" x2="-8" y2="8"  stroke="#bfdbfe" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+    <g style="transform-box:fill-box;transform-origin:50% 50%;animation:snowFlakeFall 2.2s ease-in infinite 0.9s" transform="translate(93,73)">
+      <line x1="0" y1="-11" x2="0"  y2="11"  stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-11" y1="0" x2="11" y2="0"   stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-8"  y1="-8" x2="8" y2="8"   stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="8"   y1="-8" x2="-8" y2="8"  stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+  </svg>`;
+}
+
+function svgFog() {
+  return `<svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="12"  y="32" width="106" height="10" rx="5" fill="#e2e8f0" style="animation:fogPulse 2.8s ease-in-out infinite 0s"/>
+    <rect x="22"  y="52" width="86"  height="10" rx="5" fill="#cbd5e1" style="animation:fogPulse 2.8s ease-in-out infinite 0.35s"/>
+    <rect x="8"   y="72" width="100" height="10" rx="5" fill="#94a3b8" style="animation:fogPulse 2.8s ease-in-out infinite 0.7s"/>
+    <rect x="28"  y="92" width="74"  height="10" rx="5" fill="#64748b" style="animation:fogPulse 2.8s ease-in-out infinite 1.05s"/>
+  </svg>`;
+}
+
+// ── Condition → card class & SVG ──────────────────────
+
+function getConditionType(main) {
+  const m = main.toLowerCase();
+  if (m === "clear")                                                      return "sunny";
+  if (["rain", "drizzle"].some(c => m.includes(c)))                      return "rainy";
+  if (m.includes("thunderstorm"))                                        return "stormy";
+  if (["snow", "sleet", "blizzard"].some(c => m.includes(c)))            return "snowy";
+  if (["mist", "fog", "haze", "smoke", "dust", "sand", "ash"].some(c => m.includes(c))) return "foggy";
+  return "cloudy";
+}
+
+function getSVGForType(type) {
+  return { sunny: svgSun, cloudy: svgCloud, rainy: svgRain, stormy: svgStorm, snowy: svgSnow, foggy: svgFog }[type]?.() ?? svgCloud();
+}
+
+// ── Skeleton loaders ──────────────────────────────────
+
+function renderSkeletonCards() {
+  const track  = document.getElementById("showcaseTrack");
+  const dots   = document.getElementById("showcaseDots");
+  track.innerHTML = "";
+  dots.innerHTML  = "";
+  for (let i = 0; i < SHOWCASE_CITIES.length; i++) {
+    const sk = document.createElement("div");
+    sk.className = "skeleton-card";
+    sk.setAttribute("aria-hidden", "true");
+    track.appendChild(sk);
+  }
+}
+
+// ── Render live cards ─────────────────────────────────
+
+function renderShowcaseCards(results) {
+  const track = document.getElementById("showcaseTrack");
+  const dots  = document.getElementById("showcaseDots");
+  track.innerHTML = "";
+  dots.innerHTML  = "";
+
+  results.forEach((result, i) => {
+    const city = SHOWCASE_CITIES[i];
+    const card = document.createElement("div");
+    card.className = "city-card";
+
+    if (result.error) {
+      card.classList.add("card-cloudy");
+      card.innerHTML = `
+        <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+        <div class="card-city-name">${city.flag} ${city.name}</div>
+        <div class="card-svg-wrap">${svgCloud()}</div>
+        <div class="card-unavailable">Data unavailable</div>`;
+    } else {
+      const d    = result.data;
+      const type = getConditionType(d.weather[0].main);
+      const desc = capitalise(d.weather[0].description);
+      const temp = Math.round(d.main.temp);
+      const hum  = d.main.humidity;
+      const wind = (d.wind.speed * 3.6).toFixed(1);
+
+      card.classList.add(`card-${type}`);
+      card.innerHTML = `
+        <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+        <div class="card-city-name">${city.flag} ${city.name}</div>
+        <div class="card-svg-wrap">${getSVGForType(type)}</div>
+        <div class="card-temp">${temp}°C</div>
+        <div class="card-condition">${desc}</div>
+        <div class="card-stats">
+          <span class="card-stat-pill">💧 ${hum}%</span>
+          <span class="card-stat-pill">💨 ${wind} km/h</span>
+        </div>`;
+    }
+
+    track.appendChild(card);
+
+    // Dot
+    const dot = document.createElement("button");
+    dot.className = "showcase-dot" + (i === 0 ? " active" : "");
+    dot.setAttribute("role", "tab");
+    dot.setAttribute("aria-label", `Show ${city.name}`);
+    dot.setAttribute("aria-selected", i === 0 ? "true" : "false");
+    dot.addEventListener("click", () => {
+      resetShowcaseTimer();
+      goToCard(i);
+    });
+    dots.appendChild(dot);
+  });
+
+  goToCard(0);
+  startShowcaseTimer();
+}
+
+// ── Carousel navigation ───────────────────────────────
+
+function goToCard(index) {
+  const carousel = document.getElementById("showcaseCarousel");
+  const track    = document.getElementById("showcaseTrack");
+  const allDots  = document.querySelectorAll(".showcase-dot");
+  const cards    = track.children;
+
+  if (!cards.length) return;
+
+  showcaseCurrentIndex = index;
+
+  const isMobile   = window.innerWidth <= 640;
+  const gap        = isMobile ? 16 : 24;
+  const cardWidth  = cards[0].offsetWidth;
+  const contWidth  = carousel.offsetWidth;
+
+  // Centre active card in the viewport
+  let offset = index * (cardWidth + gap) - (contWidth / 2 - cardWidth / 2);
+  const maxOffset = SHOWCASE_CITIES.length * (cardWidth + gap) - contWidth;
+  offset = Math.min(Math.max(0, offset), Math.max(0, maxOffset));
+
+  track.style.transform = `translateX(-${offset}px)`;
+
+  allDots.forEach((dot, i) => {
+    const active = i === index;
+    dot.classList.toggle("active", active);
+    dot.setAttribute("aria-selected", String(active));
+  });
+}
+
+function startShowcaseTimer() {
+  showcaseTimer = setInterval(() => {
+    goToCard((showcaseCurrentIndex + 1) % SHOWCASE_CITIES.length);
+  }, 5000);
+}
+
+function resetShowcaseTimer() {
+  if (showcaseTimer) {
+    clearInterval(showcaseTimer);
+    startShowcaseTimer();
+  }
+}
+
+// ── Swipe / touch support ─────────────────────────────
+
+function initShowcaseSwipe() {
+  const carousel = document.getElementById("showcaseCarousel");
+
+  carousel.addEventListener("touchstart", (e) => {
+    showcaseTouchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  carousel.addEventListener("touchend", (e) => {
+    const diff = showcaseTouchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 40) {
+      resetShowcaseTimer();
+      if (diff > 0) {
+        goToCard((showcaseCurrentIndex + 1) % SHOWCASE_CITIES.length);
+      } else {
+        goToCard((showcaseCurrentIndex - 1 + SHOWCASE_CITIES.length) % SHOWCASE_CITIES.length);
+      }
+    }
+  }, { passive: true });
+
+  // Recalculate on resize
+  window.addEventListener("resize", () => goToCard(showcaseCurrentIndex), { passive: true });
+}
+
+// ── Fetch all 5 cities with Promise.all ───────────────
+
+async function initShowcase() {
+  renderSkeletonCards();
+
+  const fetches = SHOWCASE_CITIES.map(city =>
+    fetch(`${OPENWEATHER_BASE_URL}?q=${encodeURIComponent(city.name)},${city.country}&appid=${OPENWEATHER_API_KEY}&units=metric`)
+      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
+      .then(data => ({ data }))
+      .catch(() => ({ error: true }))
+  );
+
+  const results = await Promise.all(fetches);
+  renderShowcaseCards(results);
+  initShowcaseSwipe();
+}
+
+initShowcase();
+
+// ════════════════════════════════════════════════════════
 // CLAUDE API
 // ════════════════════════════════════════════════════════
 async function callClaude(prompt) {
