@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClimAI — AI-Powered Weather Intelligence</title>
+  <meta name="description" content="ClimAI combines live weather data, computer vision, and AI language models to give you intelligent, human-friendly weather insights." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+  <!-- MobileNet -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       ANIMATED BACKGROUND LAYER
+  ═══════════════════════════════════════════ -->
+  <div class="bg-layer" id="bgLayer" aria-hidden="true">
+    <!-- Clouds -->
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-4"></div>
+
+    <!-- Sun (clear weather) -->
+    <div class="sun" id="sunEl"></div>
+
+    <!-- Rain drops container -->
+    <div class="rain-container" id="rainContainer"></div>
+
+    <!-- Snow flakes container -->
+    <div class="snow-container" id="snowContainer"></div>
+
+    <!-- Lightning -->
+    <div class="lightning" id="lightningEl"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="#hero" class="nav-logo">
+      <span class="logo-icon">⛅</span>
+      <span>ClimAI</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks" role="list">
+      <li><a href="#live-weather">Live Weather</a></li>
+      <li><a href="#sky-detector">Sky Detector</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       HERO SECTION
+  ═══════════════════════════════════════════ -->
+  <section class="hero" id="hero" aria-labelledby="heroHeading">
+    <div class="hero-content">
+      <p class="hero-eyebrow">✨ Powered by Claude &amp; TensorFlow.js</p>
+      <h1 id="heroHeading">Weather Intelligence,<br /><span class="gradient-text">Reimagined</span></h1>
+      <p class="hero-tagline">AI-Powered Weather Intelligence — real-time data, computer vision, and conversational insights all in one place.</p>
+      <a href="#live-weather" class="btn btn-primary hero-cta">
+        Explore the Weather
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 1 — LIVE WEATHER DETECTION
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="live-weather" aria-labelledby="weatherHeading">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-badge">🌐 Real-Time Data</span>
+        <h2 id="weatherHeading">Live Weather Lookup</h2>
+        <p class="section-sub">Search any city worldwide and get instant AI-powered weather insights.</p>
+      </div>
+
+      <div class="glass-card weather-card">
+        <form class="weather-form" id="weatherForm" novalidate>
+          <div class="input-group">
+            <input
+              type="text"
+              id="cityInput"
+              class="text-input"
+              placeholder="Enter a city name..."
+              autocomplete="off"
+              aria-label="City name"
+              required
+            />
+            <button type="submit" class="btn btn-primary" id="detectBtn">
+              <span class="btn-text">Detect Weather</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="input-error" id="weatherError" role="alert" aria-live="polite"></p>
+        </form>
+
+        <!-- Weather Result -->
+        <div class="weather-result hidden" id="weatherResult" aria-live="polite">
+          <div class="weather-top">
+            <div class="weather-location">
+              <h3 id="weatherCity"></h3>
+              <p id="weatherCountry" class="weather-country"></p>
+            </div>
+            <img id="weatherIcon" src="" alt="" class="weather-icon-img" />
+          </div>
+          <div class="weather-stats">
+            <div class="stat-item">
+              <span class="stat-label">Temperature</span>
+              <span class="stat-value" id="weatherTemp"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Feels Like</span>
+              <span class="stat-value" id="weatherFeelsLike"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Humidity</span>
+              <span class="stat-value" id="weatherHumidity"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Wind Speed</span>
+              <span class="stat-value" id="weatherWind"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Condition</span>
+              <span class="stat-value" id="weatherCondition"></span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Visibility</span>
+              <span class="stat-value" id="weatherVisibility"></span>
+            </div>
+          </div>
+
+          <!-- AI Insight box -->
+          <div class="ai-insight hidden" id="weatherInsight">
+            <div class="ai-insight-header">
+              <span class="ai-badge">🧠 AI Insight</span>
+              <span class="ai-model-label">Claude Sonnet</span>
+            </div>
+            <div class="ai-insight-body">
+              <div class="ai-loading hidden" id="weatherAiLoading" aria-label="Loading AI insight">
+                <div class="dot-pulse"><span></span><span></span><span></span></div>
+                <p>Generating insight…</p>
+              </div>
+              <p class="ai-text" id="weatherAiText"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 2 — SKY PHOTO CLASSIFIER
+  ═══════════════════════════════════════════ -->
+  <section class="section section-alt" id="sky-detector" aria-labelledby="skyHeading">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-badge">📸 Computer Vision</span>
+        <h2 id="skyHeading">Sky Photo Detector</h2>
+        <p class="section-sub">Upload a photo of the sky and our on-device AI will classify the conditions instantly.</p>
+      </div>
+
+      <div class="glass-card sky-card">
+        <!-- Upload zone -->
+        <div
+          class="upload-zone"
+          id="uploadZone"
+          role="button"
+          tabindex="0"
+          aria-label="Upload sky photo — click or drag and drop"
+        >
+          <div class="upload-placeholder" id="uploadPlaceholder">
+            <div class="upload-icon">📷</div>
+            <p class="upload-title">Drag &amp; drop a sky photo</p>
+            <p class="upload-sub">or <span class="upload-link">click to browse</span></p>
+            <p class="upload-hint">Supports JPG, PNG, WEBP — max 10 MB</p>
+          </div>
+          <img id="skyPreview" src="" alt="Uploaded sky preview" class="sky-preview hidden" />
+        </div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" class="sr-only" aria-label="Select image file" />
+
+        <!-- Classification results -->
+        <div class="classify-result hidden" id="classifyResult" aria-live="polite">
+          <h4 class="classify-title">Top Classifications</h4>
+          <ul class="bar-chart" id="barChart" role="list"></ul>
+
+          <!-- AI Insight box -->
+          <div class="ai-insight hidden" id="skyInsight">
+            <div class="ai-insight-header">
+              <span class="ai-badge">🧠 AI Insight</span>
+              <span class="ai-model-label">Claude Sonnet</span>
+            </div>
+            <div class="ai-insight-body">
+              <div class="ai-loading hidden" id="skyAiLoading" aria-label="Loading AI insight">
+                <div class="dot-pulse"><span></span><span></span><span></span></div>
+                <p>Generating insight…</p>
+              </div>
+              <p class="ai-text" id="skyAiText"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TF loading state -->
+        <div class="tf-loading hidden" id="tfLoading" aria-live="polite">
+          <div class="spinner-ring"></div>
+          <p>Loading computer vision model…</p>
+        </div>
+
+        <!-- Error -->
+        <p class="input-error hidden" id="skyError" role="alert" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       ABOUT SECTION
+  ═══════════════════════════════════════════ -->
+  <section class="section" id="about" aria-labelledby="aboutHeading">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-badge">💡 About</span>
+        <h2 id="aboutHeading">What is ClimAI?</h2>
+      </div>
+
+      <div class="about-body">
+        <p class="about-text">
+          ClimAI combines live weather data, computer vision, and AI language models to give you intelligent,
+          human-friendly weather insights. Whether you want to know what to wear, whether to carry an umbrella,
+          or simply understand what that ominous sky outside means — ClimAI has you covered.
+        </p>
+        <div class="feature-grid">
+          <div class="feature-card glass-card">
+            <div class="feature-icon">🌐</div>
+            <h3 class="feature-title">Live Data</h3>
+            <p class="feature-desc">Real-time weather from OpenWeatherMap covering 200,000+ cities worldwide, updated every few minutes.</p>
+          </div>
+          <div class="feature-card glass-card">
+            <div class="feature-icon">🧠</div>
+            <h3 class="feature-title">AI Analysis</h3>
+            <p class="feature-desc">Claude Sonnet translates raw weather numbers into clear, practical advice tailored to your location.</p>
+          </div>
+          <div class="feature-card glass-card">
+            <div class="feature-icon">📸</div>
+            <h3 class="feature-title">Image Detection</h3>
+            <p class="feature-desc">MobileNet runs entirely in your browser — no uploads to any server — giving you instant sky classification.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <p class="footer-brand">
+        <span class="logo-icon">⛅</span> ClimAI
+      </p>
+      <p class="footer-copy">Built by Chizy · ClimAI © 2025</p>
+      <a
+        href="https://github.com/chizyy7"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="footer-github"
+        aria-label="GitHub profile"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.185 6.839 9.504.5.092.682-.217.682-.482
+            0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466
+            -.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832
+            .092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688
+            -.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0
+            012.504.338c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595
+            1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012
+            2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.021C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        chizyy7
+      </a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
