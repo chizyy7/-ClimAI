@@ -55,6 +55,7 @@
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links" id="navLinks" role="list">
+      <li><a href="#world-weather">World Weather</a></li>
       <li><a href="#live-weather">Live Weather</a></li>
       <li><a href="#sky-detector">Sky Detector</a></li>
       <li><a href="#about">About</a></li>
@@ -73,6 +74,27 @@
         Explore the Weather
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
       </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       WORLD WEATHER SHOWCASE
+  ═══════════════════════════════════════════ -->
+  <section class="section showcase-section" id="world-weather" aria-labelledby="showcaseHeading">
+    <div class="section-inner showcase-inner">
+      <div class="section-header">
+        <span class="section-badge">🌍 Live Global Data</span>
+        <h2 id="showcaseHeading">World Weather — Live</h2>
+        <p class="section-sub">Real-time conditions across major cities</p>
+      </div>
+
+      <div class="showcase-carousel" id="showcaseCarousel" aria-label="World weather carousel">
+        <div class="showcase-track" id="showcaseTrack">
+          <!-- City cards injected by JS -->
+        </div>
+      </div>
+
+      <div class="showcase-dots" id="showcaseDots" role="tablist" aria-label="City selector"></div>
     </div>
   </section>
 

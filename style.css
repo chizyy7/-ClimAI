@@ -792,6 +792,263 @@ body.weather-stormy .lightning { animation: lightningFlash 4s ease-in-out infini
 }
 
 /* ═══════════════════════════════════════════════════════
+   WORLD WEATHER SHOWCASE
+═══════════════════════════════════════════════════════ */
+
+.showcase-section {
+  overflow: hidden;
+  padding-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+.showcase-inner {
+  max-width: 1100px;
+}
+
+.showcase-carousel {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.showcase-track {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem 0.25rem 1.5rem;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* ── City Card ────────────────────────────────────────── */
+.city-card {
+  flex: 0 0 280px;
+  height: 380px;
+  border-radius: 24px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.20);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  padding: 1.5rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.city-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 55px rgba(0,0,0,0.5);
+}
+
+/* Card gradient backgrounds per weather type */
+.city-card.card-sunny {
+  background: linear-gradient(145deg, rgba(251,146,60,0.40) 0%, rgba(253,230,138,0.22) 100%);
+}
+.city-card.card-cloudy {
+  background: linear-gradient(145deg, rgba(44,62,80,0.58) 0%, rgba(61,90,128,0.48) 100%);
+}
+.city-card.card-rainy {
+  background: linear-gradient(145deg, rgba(31,41,55,0.65) 0%, rgba(14,76,109,0.52) 100%);
+}
+.city-card.card-stormy {
+  background: linear-gradient(145deg, rgba(30,10,60,0.75) 0%, rgba(50,30,80,0.58) 100%);
+}
+.city-card.card-snowy {
+  background: linear-gradient(145deg, rgba(191,219,254,0.28) 0%, rgba(224,242,254,0.18) 100%);
+}
+.city-card.card-foggy {
+  background: linear-gradient(145deg, rgba(100,116,139,0.45) 0%, rgba(148,163,184,0.32) 100%);
+}
+
+/* ── LIVE badge ───────────────────────────────────────── */
+.live-badge {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(239,68,68,0.18);
+  border: 1px solid rgba(239,68,68,0.45);
+  border-radius: 99px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #f87171;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.65); }
+}
+
+/* ── Card content ─────────────────────────────────────── */
+.card-city-name {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 0.35rem;
+}
+
+.card-svg-wrap {
+  width: 130px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-temp {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.card-condition {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.card-stats {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.card-stat-pill {
+  background: rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 99px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.88);
+}
+
+.card-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+}
+
+/* ── Skeleton loader cards ────────────────────────────── */
+.skeleton-card {
+  flex: 0 0 280px;
+  height: 380px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.11);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.08) 40%,
+    rgba(255,255,255,0.14) 50%,
+    rgba(255,255,255,0.08) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ── Dot indicators ───────────────────────────────────── */
+.showcase-dots {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 1.4rem;
+}
+
+.showcase-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.28);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s ease, transform 0.3s ease, width 0.3s ease;
+}
+
+.showcase-dot.active {
+  background: var(--color-cyan);
+  transform: scale(1.25);
+  width: 22px;
+  border-radius: 4px;
+}
+
+.showcase-dot:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+/* ── SVG weather illustration keyframes ──────────────── */
+@keyframes sunRaysGlow {
+  0%, 100% { transform: rotate(0deg);     opacity: 0.85; }
+  50%       { transform: rotate(22.5deg); opacity: 1; }
+}
+
+@keyframes rainDrop {
+  0%   { transform: translateY(0);    opacity: 0.9; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(28px); opacity: 0; }
+}
+
+@keyframes snowFlakeFall {
+  0%   { transform: translateY(0)    rotate(0deg);   opacity: 0.9; }
+  100% { transform: translateY(32px) rotate(180deg); opacity: 0; }
+}
+
+@keyframes fogPulse {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 0.25; }
+}
+
+/* ── Mobile: single-card view ─────────────────────────── */
+@media (max-width: 640px) {
+  .showcase-track { gap: 1rem; }
+  .city-card,
+  .skeleton-card { flex: 0 0 calc(100vw - 3rem); }
+}
+
+/* ═══════════════════════════════════════════════════════
    ABOUT SECTION
 ═══════════════════════════════════════════════════════ */
 .about-text {
