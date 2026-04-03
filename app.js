@@ -4,8 +4,8 @@
 ═══════════════════════════════════════════════════════ */
 
 // ── API Configuration ────────────────────────────────
-const OPENWEATHER_API_KEY  = "YOUR_OPENWEATHER_API_KEY"; // Replace with real key
-const ANTHROPIC_API_KEY    = "YOUR_ANTHROPIC_API_KEY"; // Replace with real key
+const OPENWEATHER_API_KEY  = "1304b1fcd418382ee181c21ec8291908"; // Replace with real key
+const ANTHROPIC_API_KEY    = "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"; // Replace with real key
 const OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
 const ANTHROPIC_API_URL    = "https://api.anthropic.com/v1/messages";
 
